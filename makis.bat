@@ -35,7 +35,6 @@ for /f "tokens=1 skip=3 delims= " %%a in (checksums.txt) do (
 :getPrefetch
 winprefetchview.exe /shtml %HTML_DIR%\winpf_view.html /sort "~Modified Time"
 
-goto end
 
 :checkDumpIt
 ECHO.
