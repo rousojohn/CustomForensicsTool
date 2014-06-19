@@ -21,7 +21,7 @@ ECHO.
 fciv %usbpath%DumpIt.exe -sha1 > checksums.txt
 
 for /f "tokens=1 skip=3 delims= " %%a in (checksums.txt) do (
-   find "%%a" <"test.txt" || >>result2.txt echo %%a
+   find "%%a" <"originalSigs.txt" || >>result2.txt echo %%a
     if exist result2.txt ( goto end ) else ( goto CheckOs)
    
 )
@@ -81,11 +81,24 @@ ECHO 			Registry Acquisition
 ECHO ***************************************************************************
 ECHO ***************************************************************************
 ECHO.
-%rawcopy% %systemroot%\system32\config\SYSTEM "%~dp0%"Output
-%rawcopy% %systemroot%\system32\config\SECURITY "%~dp0%"\Output
-%rawcopy% %systemroot%\system32\config\DEFAULT "%~dp0%"\Output
-%rawcopy% %systemroot%\system32\config\SAM "%~dp0%"\Output
-%rawcopy% %systemroot%\system32\config\SOFTWARE "%~dp0%"\Output
+
+mkdir "%~dp0%"\Output\RegistryFiles
+set REG_OUTPUT="%~dp0%"\Output\RegistryFiles
+set OLDDIR=%cd%
+pushd %systemroot%\system32\config\
+
+for /f "delims=" %%f in ('dir /a:d /b') do (
+	mkdir %REG_OUTPUT%\%%f
+	for /f "delims=" %%A in ('dir /b /a:-d /s %cd%\%%f') do (
+		%rawcopy% "%%A" %REG_OUTPUT%\%%f\
+	)
+)
+for /f "delims=" %%f in ('dir /a:-d /b') do (
+	%OLDDIR%\RawCopy_v1.0.0.7\RawCopy64.exe "%cd%\%%f" %REG_OUTPUT%
+)
+
+popd
+
 
 :MFTAcquisition
 ECHO.
