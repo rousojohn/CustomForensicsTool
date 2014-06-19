@@ -9,6 +9,33 @@ ECHO ***************************************************************************
 ECHO.
 
 set usbpath=%~dp0%
+set OUT_DIR=%usbpath%Output
+set HTML_DIR=%OUT_DIR%\html
+set REG_OUTPUT=%OUT_DIR%\RegistryFiles
+set USERS_DIR=%OUT_DIR%\Users
+
+md %OUT_DIR%
+md %HTML_DIR%
+
+:checkWinPrefetchView
+echo.
+echo ***************************************************************************
+echo ***************************************************************************
+echo 			Checking WinPrefetchView Tool
+echo ***************************************************************************
+echo ***************************************************************************
+echo.
+fciv %usbpath%winprefetchview.exe -sha1 > checksums.txt
+
+for /f "tokens=1 skip=3 delims= " %%a in (checksums.txt) do (
+   find "%%a" <"originalSigs.txt" || >>result2.txt echo %%a
+    if exist result2.txt ( goto end ) else ( goto getPrefetch)
+)
+
+:getPrefetch
+winprefetchview.exe /shtml %HTML_DIR%\winpf_view.html /sort "~Modified Time"
+
+goto end
 
 :checkDumpIt
 ECHO.
@@ -48,7 +75,7 @@ IF %ERRORLEVEL% == 0 SET XP=0
 findstr /i windows.8 systeminfo.log >nul
 IF %ERRORLEVEL% == 0 SET XP=0
 
-md %~dp0%Output
+
 
 
 
@@ -82,8 +109,8 @@ ECHO ***************************************************************************
 ECHO ***************************************************************************
 ECHO.
 
-mkdir "%~dp0%"\Output\RegistryFiles
-set REG_OUTPUT="%~dp0%"\Output\RegistryFiles
+mkdir %REG_OUTPUT%
+
 set OLDDIR=%cd%
 pushd %systemroot%\system32\config\
 
@@ -108,7 +135,7 @@ ECHO 			MFT Acquisition
 ECHO ***************************************************************************
 ECHO ***************************************************************************
 ECHO.
-%rawcopy% C:0 "%~dp0%"\Output
+%rawcopy% C:0 %OUT_DIR%
 
 
 ECHO.
@@ -118,13 +145,14 @@ ECHO 			NTuser Acquisition
 ECHO ***************************************************************************
 ECHO ***************************************************************************
 ECHO.
-md %usbpath%Output\Users
-ECHO Getting Users
-if %XP% == 0 (for /f %%f in ('dir C:\Users\* /b') do md %usbpath%Output\Users\%%~nf
 
-		for /f %%f in ('dir C:\Users\* /b') do %rawcopy% C:\Users\%%~nf\NTUSER.dat %usbpath%Output\Users\%%~nf
-) ELSE ( for /f %%f in ('dir C:\"Documents and settings"\* /b') do md %usbpath%Output\Users\%%~nf
-		for /f %%f in ('dir C:\"Documents and settings"\* /b') do %rawcopy% C:\"Documents and settings"\%%~nf\NTUSER.DAT %usbpath%Output\Users\%%~nf
+md %USERS_DIR%
+ECHO Getting Users
+if %XP% == 0 (for /f %%f in ('dir C:\Users\* /b') do md %USERS_DIR%\%%~nf
+
+		for /f %%f in ('dir C:\Users\* /b') do %rawcopy% C:\Users\%%~nf\NTUSER.dat %USERS_DIR%\%%~nf
+) ELSE ( for /f %%f in ('dir C:\"Documents and settings"\* /b') do md %USERS_DIR%\%%~nf
+		for /f %%f in ('dir C:\"Documents and settings"\* /b') do %rawcopy% C:\"Documents and settings"\%%~nf\NTUSER.DAT %USERS_DIR%\%%~nf
 )
 
 :MemoryAcquisition
