@@ -184,3 +184,31 @@ ECHO ***************************************************************************
 ECHO ***************************************************************************
 ECHO.
 endlocal
+echo.&pause&goto:eof
+
+
+
+REM The 2 next function produce a html file.
+REM They should be called like this:
+REM		OpenHtmlFile "filename"
+REM	do something which outputs to the filename.html eg: echo lala >> filename.html
+REM		CloseHtmlFile "filename"
+
+
+
+:OpenHtmlFile
+set TMPHTMLFILE=HTML_DIR\%~1.html
+echo ^<!doctype html^> > %TMPHTMLFILE%
+echo ^<html^>^<head^> >> %TMPHTMLFILE%
+echo ^<title^>%~1^</title^> >> %TMPHTMLFILE%
+echo ^</head^> >> %TMPHTMLFILE%
+echo ^<body^> >> %TMPHTMLFILE%
+echo ^<pre^> >> %TMPHTMLFILE%
+goto:eof
+
+:CloseHtmlFile
+set TMPHTMLFILE=HTML_DIR\%~1.html
+echo ^</pre^> >> %TMPHTMLFILE%
+echo ^</body^> >> %TMPHTMLFILE% 
+echo ^</html^> >> %TMPHTMLFILE%
+goto:eof
