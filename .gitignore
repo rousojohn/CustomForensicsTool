@@ -2,3 +2,6 @@
 RawCopy_v1.0.0.7/readme.txt
 checksums.txt
 winpf_view.html
+*.cfg
+Output/$MFT
+Output/BrowsersInfo/FF/chromecacheview_Public.csv
