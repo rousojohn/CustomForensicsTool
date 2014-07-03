@@ -5,3 +5,4 @@ winpf_view.html
 *.cfg
 Output/$MFT
 Output/BrowsersInfo/FF/chromecacheview_Public.csv
+test.bat
