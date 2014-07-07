@@ -27,7 +27,7 @@ call:OpenIndexHtmlFile %INDEX_HTML_FILE%
 echo.
 echo ***************************************************************************
 echo ***************************************************************************
-echo 			Generating Filesystem timeline
+echo      Generating Filesystem timeline
 echo ***************************************************************************
 echo ***************************************************************************
 echo.
@@ -154,13 +154,13 @@ set OLDDIR=%cd%
 pushd %systemroot%\system32\config\
 
 for /f "delims=" %%f in ('dir /a:d /b') do (
-	mkdir %REG_OUTPUT%\%%f
-	for /f "delims=" %%A in ('dir /b /a:-d /s %cd%\%%f') do (
-		%rawcopy% "%%A" %REG_OUTPUT%\%%f\ >> %OLDDIR%\tmp.txt
-	)
+  mkdir %REG_OUTPUT%\%%f
+  for /f "delims=" %%A in ('dir /b /a:-d /s %cd%\%%f') do (
+    %rawcopy% "%%A" %REG_OUTPUT%\%%f\ >> %OLDDIR%\tmp.txt
+  )
 )
 for /f "delims=" %%f in ('dir /a:-d /b') do (
-	%rawcopy% "%cd%\%%f" %REG_OUTPUT% >> %OLDDIR%\tmp.txt
+  %rawcopy% "%cd%\%%f" %REG_OUTPUT% >> %OLDDIR%\tmp.txt
 )
 
 
@@ -448,10 +448,12 @@ set BROWSER_OUT_DIR=%OUT_DIR%\BrowsersInfo
 set IE=%BROWSER_OUT_DIR%\IE
 set FF=%BROWSER_OUT_DIR%\FF
 set CHROME=%BROWSER_OUT_DIR%\FF
+set COOKIES=%BROWSER_OUT_DIR%\Cookies
 md %BROWSER_OUT_DIR%
 md %IE%
 md %FF%
 md %CHROME%
+md %COOKIES%
 
 now.exe [Now gathering information from various browsers] >> %SCRIPT_LOG_FILE%
 
@@ -494,9 +496,9 @@ ECHO !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 ECHO.
 
 if %XP%==0 (
-  for /F %%u in ('dir /b c:\Users') do for /F %%p in ('dir /b c:\Users\%%u\AppData\Roaming\Mozilla\Firefox\Profiles\') do @MozillaHistoryView.exe /sverhtml  "%FF%\ffhv_%%u_%%p.csv" -file "c:\Users\%%u\AppData\Roaming\Mozilla\Firefox\Profiles\%%p\places.sqlite" 2>> %SCRIPT_LOG_FILE%  
+  for /F %%u in ('dir /b c:\Users') do for /F %%p in ('dir /b c:\Users\%%u\AppData\Roaming\Mozilla\Firefox\Profiles\') do @MozillaHistoryView.exe /stab "%FF%\ffhv_%%u_%%p.csv" -file "c:\Users\%%u\AppData\Roaming\Mozilla\Firefox\Profiles\%%p\places.sqlite" 2>> %SCRIPT_LOG_FILE%  
 ) else (
-  for /F %%u in ('dir /b "c:\Documents and Settings"') do for /F %%p in ('dir /b "c:\Documents and Settings\%%u\Application Data\Mozilla\Firefox\Profiles\"') do @MozillaHistoryView.exe /sverhtml  "%FF%\ffhv_%%u_%%p.csv" -file "c:\Documents and Settings\%%u\Application Data\Mozilla\Firefox\Profiles\%%p\places.sqlite" 2>> %SCRIPT_LOG_FILE%  
+  for /F %%u in ('dir /b "c:\Documents and Settings"') do for /F %%p in ('dir /b "c:\Documents and Settings\%%u\Application Data\Mozilla\Firefox\Profiles\"') do @MozillaHistoryView.exe /stab "%FF%\ffhv_%%u_%%p.csv" -file "c:\Documents and Settings\%%u\Application Data\Mozilla\Firefox\Profiles\%%p\places.sqlite" 2>> %SCRIPT_LOG_FILE%  
 )
 
 echo. > tmp.txt
@@ -520,9 +522,9 @@ ECHO  Running Google ChromeCacheView.
 now.exe [Running Google ChromeCacheView.] >> %SCRIPT_LOG_FILE%
 
 if %XP%==0 (
-  for /F %%i in ('dir /b c:\Users') do @chromecacheview.exe /sverhtml "%CHROME%\chromecacheview_%%i.csv" -folder "c:\Users\%%i\AppData\Local\Google\Chrome\User Data\Default\Cache" 2>> %SCRIPT_LOG_FILE%  
+  for /F %%i in ('dir /b c:\Users') do @chromecacheview.exe /stab "%CHROME%\chromecacheview_%%i.csv" -folder "c:\Users\%%i\AppData\Local\Google\Chrome\User Data\Default\Cache" 2>> %SCRIPT_LOG_FILE%  
 ) else (
-  for /F %%i in ('dir /b "c:\Documents and Settings"') do @chromecacheview.exe /sverhtml "%CHROME%\chromecacheview_%%i.csv" -folder "c:\Documents and Settings\%%i\Application Data\Local Settings\Google\Chrome\User Data\Default\Cache" 2>> %SCRIPT_LOG_FILE%  
+  for /F %%i in ('dir /b "c:\Documents and Settings"') do @chromecacheview.exe /stab "%CHROME%\chromecacheview_%%i.csv" -folder "c:\Documents and Settings\%%i\Application Data\Local Settings\Google\Chrome\User Data\Default\Cache" 2>> %SCRIPT_LOG_FILE%  
 )
 
 echo. > tmp.txt
@@ -537,6 +539,48 @@ type tmp.txt >> %HTML_DIR%\chromecacheview.html
 call:CloseHtmlFile "chromecacheview"
 call:MakeIndexEntry %INDEX_HTML_FILE% "chromecacheview.html" "Google Chrome History Log"
 
+
+ECHO.
+ECHO ***************************************************************************
+ECHO  Collecting Cookies.
+ECHO ***************************************************************************
+ECHO.
+
+now.exe [Collecting Cookies.] >> %SCRIPT_LOG_FILE%
+if %XP%==0 (
+  ECHO  Now collecting IE Cookies...
+  for /F %%i in ('dir /b c:\Users') do @mkdir "%COOKIES%\%%i_cookies" & xcopy /e /c /q /i /g /h /y "c:\Users\%%i\AppData\Roaming\Microsoft\Windows\Cookies" "%COOKIES%\%%i_cookies" 2>> %SCRIPT_LOG_FILE%
+  IF EXIST "%PROGRAMFILES%\Google\Chrome" (
+    ECHO    Now searching for CHROME COOKIES.
+    ECHO  Now collecting Chrome Cookies...
+    for /F %%i in ('dir /b c:\Users') do @mkdir "%COOKIES%\%%i_Chrome_cookies" & xcopy /e /c /q /i /g /h /y "C:\Users\%%i\AppData\Local\Google\Chrome\User Data\Default\Local Storage" "%COOKIES%\%%i_Chrome_cookies" 2>> %SCRIPT_LOG_FILE%
+  )
+  IF EXIST "%PROGRAMFILES%\Mozilla Firefox" (
+    ECHO    Now searching for Firefox profiles and gathering Firefox cookies.
+    for /F %%u in ('dir /b c:\Users') do for /F %%p in ('dir /b c:\Users\%%u\AppData\Roaming\Mozilla\Firefox\Profiles\') do @copy /v /y "c:\Users\%%u\AppData\Roaming\Mozilla\Firefox\Profiles\%%p\cookies.sqlite" "%COOKIES%\mzcv_%%u_%%p_cookies.sqlite" 2>> %SCRIPT_LOG_FILE%  
+  )
+
+) else (
+  ECHO  Now collecting IE Cookies...
+  for /F %%i in ('dir /b "c:\Documents and Settings"') do @mkdir "%COOKIES%\%%i_cookies" & xcopy /e /c /q /i /g /h /y "c:\Documents and Settings\%%i\Cookies" "%COOKIES%\%%i_cookies" 2>> %SCRIPT_LOG_FILE%
+  IF NOT EXIST "%PROGRAMFILES%\Mozilla Firefox" GOTO FINISH_COOKIES
+  ECHO    Now searching for Firefox profiles and gathering Firefox cookies.  
+  for /F %%u in ('dir /b "c:\Documents and Settings"') do for /F %%p in ('dir /b "c:\Documents and Settings\%%u\Application Data\Mozilla\Firefox\Profiles\"') do @copy /v /y "c:\Documents and Settings\%%u\Application Data\Mozilla\Firefox\Profiles\%%p\cookies.sqlite" "%COOKIES%\mzcv_%%u_%%p_cookies.sqlite" 2>> %SCRIPT_LOG_FILE%
+)
+
+call:OpenIndexHtmlFile %HTML_DIR%\cookies.html
+
+for /F %%i in ('dir /b /a:-d /s "%COOKIES%"') do (
+
+  call:MakeFileIndexEntry %HTML_DIR%\cookies.html "%%i" "%%i"
+)
+
+call:CloseIndexHtmlFile %HTML_DIR%\cookies.html
+call:MakeIndexEntry %INDEX_HTML_FILE% "cookies.html" "Cookies Log"
+
+
+
+:FINISH_COOKIES
 
 :MemoryAcquisition
 ECHO.
@@ -600,27 +644,9 @@ call:CloseIndexHtmlFile  %INDEX_HTML_FILE%
 rem ============================================================================
 rem
 rem
-REM 			CLEAN UP AREA --> delete all temp files produced by the script
+REM       CLEAN UP AREA --> delete all temp files produced by the script
 rem
 rem ============================================================================
-
-del tmp.txt
-del %SCRIPT_LOG_FILE%
-del systeminfo.log
-
-set usbpath=
-set OUT_DIR=
-set HTML_DIR=
-set REG_OUTPUT=
-set USERS_DIR=
-set INDEX_HTML_FILE=
-set SCRIPT_LOG_FILE=
-set BROWSER_OUT_DIR=
-set IE=
-set FF=
-set CHROME=
-set XP=
-set rawcopy=
 
 endlocal
 echo.&pause&goto:eof
@@ -660,6 +686,14 @@ set NEWFILE=%HTML_DIR%\%~2
 set MENULBL=%~3
 echo ^<li^>^<a href="%NEWFILE%"^>%MENULBL%^</a^>^</li^> >> %INDEXHTML%
 goto:eof
+
+:MakeFileIndexEntry
+set INDEXHTML=%~1
+set NEWFILE=%~2
+set MENULBL=%~3
+echo ^<li^>^<a href="%NEWFILE%"^>%MENULBL%^</a^>^</li^> >> %INDEXHTML%
+goto:eof
+
 
 
 :OpenIndexHtmlFile
