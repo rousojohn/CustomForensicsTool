@@ -13,7 +13,7 @@ set OUT_DIR=%usbpath%Output
 set HTML_DIR=%OUT_DIR%\html
 set REG_OUTPUT=%OUT_DIR%\RegistryFiles
 set USERS_DIR=%OUT_DIR%\Users
-set INDEX_HTML_FILE=filename.html
+set INDEX_HTML_FILE=index.html
 set SCRIPT_LOG_FILE=scriptLogFile.txt
 
 md %OUT_DIR%
@@ -581,6 +581,71 @@ call:MakeIndexEntry %INDEX_HTML_FILE% "cookies.html" "Cookies Log"
 
 
 :FINISH_COOKIES
+
+ECHO  Running sigcheck.exe on %COMPUTERNAME%.
+echo. > tmp.txt
+now.exe [Running sigcheck.exe on %COMPUTERNAME%.] >> %SCRIPT_LOG_FILE%
+sigcheck.exe -e -i -s -u C:\windows\system32 /AcceptEula 2>> %SCRIPT_LOG_FILE% >> tmp.txt
+
+call:OpenHtmlFile "sigcheck"
+type tmp.txt >> %HTML_DIR%\sigcheck.html
+call:CloseHtmlFile "sigcheck"
+call:MakeIndexEntry %INDEX_HTML_FILE% "sigcheck.html" "Sigcheck Log"
+
+ECHO.
+ECHO ***************************************************************************
+ECHO  Gathering information about startup programs
+ECHO ***************************************************************************
+ECHO.
+
+ECHO  Running autorunsc.exe -a -v on %COMPUTERNAME%.
+echo. > tmp.txt
+now.exe [Running autorunsc.exe -a -v on %COMPUTERNAME%.] >> %SCRIPT_LOG_FILE%
+autorunsc.exe -a -v /AcceptEula 2>> %SCRIPT_LOG_FILE% >> tmp.txt
+
+call:OpenHtmlFile "autorunsc"
+type tmp.txt >> %HTML_DIR%\autorunsc.html
+call:CloseHtmlFile "autorunsc"
+call:MakeIndexEntry %INDEX_HTML_FILE% "autorunsc.html" "Autorunsc Log"
+
+ECHO.
+ECHO ***************************************************************************
+ECHO  Event logs.
+ECHO ***************************************************************************
+ECHO.
+:event_logs
+
+echo. > tmp.txt
+ECHO  Running psloglist for Security events on %COMPUTERNAME%.
+now.exe [Running psloglist for Security events on %COMPUTERNAME%.] >> %SCRIPT_LOG_FILE%
+psloglist -s -t \t security /AcceptEula 2>> %SCRIPT_LOG_FILE% >> tmp.txt
+
+call:OpenHtmlFile "psloglistSecurity"
+type tmp.txt >> %HTML_DIR%\psloglistSecurity.html
+call:CloseHtmlFile "psloglistSecurity"
+call:MakeIndexEntry %INDEX_HTML_FILE% "psloglistSecurity.html" "Psloglist Security Log"
+
+echo. > tmp.txt
+ECHO  Running psloglist for Application events on %COMPUTERNAME%.
+now.exe [Running psloglist for Application events on %COMPUTERNAME%.] >> %SCRIPT_LOG_FILE%
+psloglist -s -t \t application /AcceptEula 2>> %SCRIPT_LOG_FILE% >> tmp.txt
+
+call:OpenHtmlFile "psloglistApplication"
+type tmp.txt >> %HTML_DIR%\psloglistApplication.html
+call:CloseHtmlFile "psloglistApplication"
+call:MakeIndexEntry %INDEX_HTML_FILE% "psloglistApplication.html" "Psloglist Application Log"
+
+
+echo. > tmp.txt
+ECHO  Running psloglist for System events on %COMPUTERNAME%.
+now.exe [Running psloglist for System events on %COMPUTERNAME%.] >> %SCRIPT_LOG_FILE%
+psloglist -s -t \t system /AcceptEula 2>> %SCRIPT_LOG_FILE% >> tmp.txt
+
+call:OpenHtmlFile "psloglistevents"
+type tmp.txt >> %HTML_DIR%\psloglistevents.html
+call:CloseHtmlFile "psloglistevents"
+call:MakeIndexEntry %INDEX_HTML_FILE% "psloglistevents.html" "Psloglist events Log"
+
 
 :MemoryAcquisition
 ECHO.

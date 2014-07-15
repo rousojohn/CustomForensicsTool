@@ -42,3 +42,6 @@ http://technet.microsoft.com/en-us/sysinternals/bb897556.aspx
 14) pslist.exe - Download: http://technet.microsoft.com/en-us/sysinternals/bb896682.aspx
 15) PsService.exe - a service viewer and controller for Windows. Download: http://technet.microsoft.com/en-us/sysinternals/bb897542.aspx
 16) showacls.exe & now.exe - http://www.microsoft.com/en-us/download/details.aspx?id=17657
+17) autorunsc.exe - http://technet.microsoft.com/en-us/sysinternals/bb963902.aspx
+18) psloglist.exe - http://technet.microsoft.com/en-us/sysinternals/bb897544.aspx
+19) sigcheck.exe - http://technet.microsoft.com/en-us/sysinternals/bb897441.aspx

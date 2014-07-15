@@ -6,3 +6,4 @@ winpf_view.html
 Output/$MFT
 Output/BrowsersInfo/FF/chromecacheview_Public.csv
 test.bat
+*.err
